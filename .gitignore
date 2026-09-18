@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+demo/dist
+demo/.next
+demo/node_modules
+demo/dev.log
+*.tsbuildinfo
+.DS_Store
+

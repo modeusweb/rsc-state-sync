@@ -1,0 +1,14 @@
+{
+  "name": "rsc-state-sync-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3210"
+  },
+  "dependencies": {
+    "next": "^15",
+    "rsc-state-sync": "file:..",
+    "react": "^19",
+    "react-dom": "^19"
+  }
+}
