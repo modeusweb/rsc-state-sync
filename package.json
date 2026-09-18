@@ -1,6 +1,6 @@
 {
   "name": "rsc-state-sync",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "State rehydration bridge for React Server Components: keep serializable client UI state alive across RSC navigation.",
   "keywords": [
     "react",
@@ -14,6 +14,14 @@
     "view-transitions"
   ],
   "license": "MIT",
+  "homepage": "https://github.com/modeusweb/rsc-state-sync#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modeusweb/rsc-state-sync.git"
+  },
+  "bugs": {
+    "url": "https://github.com/modeusweb/rsc-state-sync/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "engines": {
