@@ -11,3 +11,14 @@ demo/dev.log
 
 # npm credentials (never commit)
 .npmrc
+# IDE / editor
+.vscode/
+.idea/
+
+# CI / scripts
+.github/
+scripts/
+
+# lockfiles
+package-lock.json
+
