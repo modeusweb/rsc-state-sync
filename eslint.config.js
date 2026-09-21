@@ -1,11 +1,11 @@
 import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import reactHooks from "eslint-plugin-react-hooks";
 
 /**
- * Flat ESLint config. Kept lean: recommended TS rules + no-unused-vars for
- * types. React/Next correctness is enforced by tests and tsc; the hook rules
- * plugin can be enabled once the demo app lives in this repo.
+ * Flat ESLint config: recommended TS rules + no-unused-vars for types +
+ * React hook rules for the hooks-based public API.
  */
 export default tseslint.config(
   { ignores: ["dist", "node_modules", "coverage"] },
@@ -22,6 +22,11 @@ export default tseslint.config(
       ],
       "@typescript-eslint/consistent-type-imports": "warn",
     },
+  },
+  {
+    files: ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}"],
+    plugins: { "react-hooks": reactHooks },
+    rules: reactHooks.configs.recommended.rules,
   },
   {
     files: ["benchmarks/**/*", "scripts/**/*"],

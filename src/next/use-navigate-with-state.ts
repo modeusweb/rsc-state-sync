@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { navigateWithState } from "../core/index.js";
 import type { NavigateWithStateOptions, NavigationResult } from "../core/index.js";
@@ -35,9 +35,12 @@ export function useNavigateWithState(
 ): UseNavigateWithStateResult {
   const router = useRouter();
   const routerRef = useRef(router);
-  routerRef.current = router;
   const optionsRef = useRef(defaultOptions);
-  optionsRef.current = defaultOptions;
+  // Keep "latest" refs fresh without writing during render (react-hooks/refs).
+  useEffect(() => {
+    routerRef.current = router;
+    optionsRef.current = defaultOptions;
+  });
 
   const run = useCallback(
     (action: (router: ReturnType<typeof useRouter>) => void, options?: StateNavigationOptions) => {

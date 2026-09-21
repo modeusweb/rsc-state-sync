@@ -35,3 +35,19 @@ for (const file of files) {
   console.log(`${file.replace(distDir, "dist/")} | ${fmt(raw)} | ${fmt(gzip)}`);
 }
 console.log(`TOTAL (js) | ${fmt(totalRaw)} | ${fmt(totalGzip)}`);
+
+/**
+ * Size budget: fails the build when the gzipped JS grows noticeably beyond
+ * the baseline. Overridable per run with `SIZE_BUDGET_KIB` (0 disables it).
+ * Baselines are re-measured deliberately (add ~10% headroom) after
+ * intentional feature work, so accidental bloat fails CI first.
+ */
+const budgetKib = Number(process.env.SIZE_BUDGET_KIB ?? 12);
+if (budgetKib > 0 && totalGzip > budgetKib * 1024) {
+  console.error(
+    `size: gzipped JS is ${fmt(totalGzip)}, over the ${fmt(budgetKib * 1024)} budget.\n` +
+      "If the growth is intentional, bump the budget (SIZE_BUDGET_KIB or benchmarks/size.mjs).",
+  );
+  process.exit(1);
+}
+console.log(`size: within budget (${fmt(budgetKib * 1024)})`);

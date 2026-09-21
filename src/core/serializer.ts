@@ -7,7 +7,19 @@ import type { StateSerializer } from "./types.js";
  */
 const TAG = "$rss";
 
+/** Quoted form of {@link TAG} as it appears in a serialized payload. */
+const TAG_MARKER = `"${TAG}"`;
+
 type Tag = "undefined" | "nan" | "inf" | "-inf" | "bigint" | "date" | "usp";
+
+/**
+ * Sentinel returned by the reviver for `undefined`.
+ *
+ * `JSON.parse` *deletes* a property whose reviver returns `undefined`, so the
+ * value has to survive parsing and be turned into a real `undefined` in a
+ * second pass (see {@link restoreSentinels}).
+ */
+const UNDEFINED = Symbol("rsc-state-sync:undefined");
 
 function tag(kind: Tag, value?: unknown): Record<string, unknown> {
   const tagged: Record<string, unknown> = { [TAG]: kind };
@@ -15,10 +27,14 @@ function tag(kind: Tag, value?: unknown): Record<string, unknown> {
   return tagged;
 }
 
-function replace(this: unknown, _key: string, value: unknown): unknown {
-  // JSON.stringify applies `toJSON()` *before* the replacer, so special
-  // prototypes are recovered through the holder instead.
-  const raw = (this as Record<string, unknown> | null)?.[_key];
+/**
+ * `JSON.stringify` applies `toJSON()` *before* the replacer runs: the value it
+ * passes in is already a string for `Date`, and the untouched instance for
+ * `URLSearchParams`. The original value is therefore always read from the
+ * holder (`this[key]`), never from the transformed argument.
+ */
+function replace(this: unknown, key: string, value: unknown): unknown {
+  const raw = (this as Record<string, unknown> | null)?.[key];
   if (value === undefined) return tag("undefined");
   if (typeof value === "number") {
     if (Number.isNaN(value)) return tag("nan");
@@ -27,12 +43,13 @@ function replace(this: unknown, _key: string, value: unknown): unknown {
     return value;
   }
   if (typeof value === "bigint") return tag("bigint", value.toString());
-  if (raw instanceof Date && value instanceof Date) {
-    return tag("date", (value as Date).toISOString());
+  if (raw instanceof Date) {
+    // `Invalid Date` has no ISO representation at all: it survives as `null`
+    // instead of throwing a RangeError.
+    const time = raw.getTime();
+    return Number.isNaN(time) ? null : tag("date", raw.toISOString());
   }
-  if (raw instanceof URLSearchParams && typeof value === "string") {
-    return tag("usp", value);
-  }
+  if (raw instanceof URLSearchParams) return tag("usp", raw.toString());
   return value;
 }
 
@@ -43,7 +60,7 @@ function revive(_key: string, value: unknown): unknown {
     if (typeof kind === "string") {
       switch (kind as Tag) {
         case "undefined":
-          return undefined;
+          return UNDEFINED;
         case "nan":
           return Number.NaN;
         case "inf":
@@ -67,16 +84,45 @@ function revive(_key: string, value: unknown): unknown {
 }
 
 /**
+ * Turns the {@link UNDEFINED} sentinels left by the reviver into real
+ * `undefined` values (keeping the property, which `JSON.parse` alone would
+ * have dropped). Only runs for payloads that actually contain a tag.
+ */
+function restoreSentinels(node: unknown): unknown {
+  if (Array.isArray(node)) {
+    for (let index = 0; index < node.length; index += 1) {
+      const value: unknown = node[index];
+      if (value === UNDEFINED) node[index] = undefined;
+      else if (value !== null && typeof value === "object") restoreSentinels(value);
+    }
+    return node;
+  }
+  if (node !== null && typeof node === "object") {
+    const record = node as Record<string, unknown>;
+    for (const key of Object.keys(record)) {
+      const value = record[key];
+      if (value === UNDEFINED) record[key] = undefined;
+      else if (value !== null && typeof value === "object") restoreSentinels(value);
+    }
+  }
+  return node;
+}
+
+/**
  * The default serializer: tagged JSON.
  *
  * Plain JSON is the right trade-off for 95% of UI state: it is tiny, fast and
  * supported everywhere. The tag layer adds just enough fidelity for the types
- * that show up in UI state: `undefined`, `NaN`/`Infinity`, `bigint`, `Date`
- * and `URLSearchParams`. Arrays, nested objects and primitives work as-is.
+ * that show up in UI state: `undefined` (including object properties and array
+ * holes, which plain JSON would drop), `NaN`/`±Infinity`, `bigint`, `Date` and
+ * `URLSearchParams`. Arrays, nested objects and primitives work as-is.
  *
  * Not supported (by design): functions, class instances other than `Date`,
- * `Map`/`Set`, symbols, circular references. Convert them or plug in a custom
- * `StateSerializer`.
+ * `Map`/`Set` (they serialize to `{}`), symbols, circular references. Convert
+ * them or plug in a custom `StateSerializer`.
+ *
+ * Payloads without any tag are parsed with plain `JSON.parse` — the tag pass
+ * costs nothing unless a tagged value is actually present.
  */
 export function createJsonSerializer<T>(): StateSerializer<T> {
   return {
@@ -84,7 +130,10 @@ export function createJsonSerializer<T>(): StateSerializer<T> {
       return JSON.stringify(value, replace);
     },
     deserialize(text: string): T {
-      return JSON.parse(text, revive) as T;
+      if (!text.includes(TAG_MARKER)) return JSON.parse(text) as T;
+      const parsed = JSON.parse(text, revive);
+      if (parsed === UNDEFINED) return undefined as T;
+      return restoreSentinels(parsed) as T;
     },
   };
 }

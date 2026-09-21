@@ -76,6 +76,52 @@ describe("core/history", () => {
     registry.dispose();
   });
 
+  it("enriches the current history entry after setState (plain <Link> safety)", async () => {
+    const registry = createRegistry();
+    const handle = registry.get("hist/enrich", { q: "" }, { persist: ["history"] });
+    handle.setState({ q: "react" });
+    // schedulePersist debounces the enrichment write by one tick.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const record = historyBucket()["hist/enrich"] as { a?: boolean } | undefined;
+    expect(record).toBeDefined();
+    // Non-authoritative: a real navigation capture may still claim authority.
+    expect(Boolean(record?.a)).toBe(false);
+    registry.dispose();
+  });
+
+  it("does not downgrade an authoritative snapshot when enriching", async () => {
+    const registry = createRegistry();
+    const handle = registry.get("hist/auth2", { step: 1 }, { persist: ["history"] });
+    handle.setState({ step: 2 });
+    handle.capture(1, "all");
+    const authoritative = historyBucket()["hist/auth2"];
+    handle.setState({ step: 3 });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(historyBucket()["hist/auth2"]).toBe(authoritative);
+    registry.dispose();
+  });
+
+  it("does not enrich when enrichHistory is disabled", async () => {
+    const registry = createRegistry();
+    const handle = registry.get("hist/no-enrich", { q: "" }, {
+      persist: ["history"],
+      enrichHistory: false,
+    });
+    handle.setState({ q: "react" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(historyBucket()["hist/no-enrich"]).toBeUndefined();
+    registry.dispose();
+  });
+
+  it("does not touch history.state when the history layer is not configured", async () => {
+    const registry = createRegistry();
+    const handle = registry.get("hist/absent", { q: "" }, { persist: ["session"] });
+    handle.setState({ q: "react" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(Object.keys(historyBucket())).toHaveLength(0);
+    registry.dispose();
+  });
+
   it("remove() cleans the scope from history.state", () => {
     const registry = createRegistry();
     const handle = registry.get("hist/clean", 1, { persist: ["history"] });

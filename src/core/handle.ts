@@ -72,6 +72,7 @@ export function createHandle<T>(
   let refCount = 0;
   let cachedPayload: { revision: number; payload: string } | null = null;
   let persistScheduled = false;
+  let persistTimer: ReturnType<typeof setTimeout> | null = null;
   const listeners = new Set<() => void>();
 
   function report(error: StateSyncError): void {
@@ -175,19 +176,22 @@ export function createHandle<T>(
     }
   }
 
-  /** Opportunistic, non-authoritative snapshot of the current history entry. */
+  /**
+   * Opportunistic, non-authoritative snapshot of the current history entry.
+   *
+   * Keeps the entry the user is *on* fresh, so that a navigation performed
+   * outside a transaction (a plain `<Link>`, an unregistered router API, a full
+   * page load) still leaves a usable snapshot behind for back/forward.
+   *
+   * An authoritative snapshot — one produced by a real navigation capture — is
+   * never downgraded.
+   */
   function enrichCurrentEntry(): void {
     if (!enrichHistory || revision === 0) return;
     if (!layers.includes(historyLayer)) return;
-    if (readLayer(historyLayer)) return;
-    const record: StoredRecord = {
-      v: version,
-      r: revision,
-      t: Date.now(),
-      a: false,
-      payload: serializeCurrent(),
-    };
-    historyLayer.write(scope, scope, record);
+    const existing = readLayer(historyLayer);
+    if (existing?.a) return;
+    persistAll(ctx.nextSequence(), "enrich");
   }
 
   function ensureInit(): void {
@@ -207,12 +211,24 @@ export function createHandle<T>(
     const result: CaptureResult = { scope, sequence, revision, persisted: [], skipped: [] };
     if (disposed || !isBrowser()) return result;
     const timestamp = Date.now();
-    const wanted: StorageLayerName[] =
-      mode === "all" ? names : mode === "leave" ? names.filter((n) => n !== "url") : ["url"];
+    // A capture mode never smuggles in a layer the slot did not opt into
+    // (e.g. `url` on a `persist: ["memory"]` slot).
+    const wanted: StorageLayerName[] = (
+      mode === "all"
+        ? names
+        : mode === "leave"
+          ? names.filter((name) => name !== "url")
+          : mode === "enrich"
+            ? names.filter((name) => name === "history")
+            : (["url"] as StorageLayerName[])
+    ).filter((name) => names.includes(name));
+    // `idle` and `enrich` writes are opportunistic: they must not claim
+    // authority over a snapshot produced by a real navigation.
+    const authoritative = mode !== "idle" && mode !== "enrich";
     let payload: string | null = null;
     for (const name of wanted) {
       const layer = name === "memory" ? ctx.memoryLayer : getSharedLayer(name);
-      const record: StoredRecord = { v: version, r: revision, t: timestamp, a: mode !== "idle" };
+      const record: StoredRecord = { v: version, r: revision, t: timestamp, a: authoritative };
       if (name === "memory") {
         record.value = state;
       } else {
@@ -244,18 +260,35 @@ export function createHandle<T>(
     return result;
   }
 
-  /** Coalesces bursts of `setState` into a single non-authoritative write. */
+  /**
+   * Coalesces bursts of `setState` into a single non-authoritative write.
+   *
+   * `session` and `url` (with `writeUrl: "immediate"`) are kept in sync for
+   * reloads and shareable links; the history enrichment keeps the entry the
+   * user is on usable for back/forward even if the app navigates without a
+   * transaction.
+   */
   function schedulePersist(): void {
     if (persistScheduled) return;
     const needsUrl = writeUrl === "immediate" && layers.some((l) => l.name === "url");
     const needsSession = layers.some((l) => l.name === "session");
-    if (!needsUrl && !needsSession) return;
+    const needsEnrich = enrichHistory && layers.includes(historyLayer);
+    if (!needsUrl && !needsSession && !needsEnrich) return;
     persistScheduled = true;
-    setTimeout(() => {
+    persistTimer = setTimeout(() => {
+      persistTimer = null;
       persistScheduled = false;
       if (disposed) return;
-      persistAll(ctx.nextSequence(), needsUrl ? "all" : "idle");
+      if (needsUrl || needsSession) persistAll(ctx.nextSequence(), needsUrl ? "all" : "idle");
+      if (needsEnrich) enrichCurrentEntry();
     }, 0);
+  }
+
+  /** Drops a pending debounced write (state is being cleared or the slot dies). */
+  function cancelScheduledPersist(): void {
+    if (persistTimer !== null) clearTimeout(persistTimer);
+    persistTimer = null;
+    persistScheduled = false;
   }
 
   function update(next: T | ((prev: T) => T), commit: boolean): void {
@@ -320,6 +353,7 @@ export function createHandle<T>(
       return state;
     },
     clear() {
+      cancelScheduledPersist();
       for (const layer of layers) {
         try {
           layer.remove(scope, keyFor(layer));
@@ -330,6 +364,7 @@ export function createHandle<T>(
     },
     dispose() {
       disposed = true;
+      cancelScheduledPersist();
       listeners.clear();
       ctx.unregister(handle);
     },

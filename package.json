@@ -29,6 +29,7 @@
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
     "README.md",
     "LICENSE"
   ],
@@ -74,7 +75,12 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint src tests benchmarks scripts",
     "bench": "node benchmarks/run.mjs",
-    "size": "node benchmarks/size.mjs"
+    "size": "node benchmarks/size.mjs",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run size"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

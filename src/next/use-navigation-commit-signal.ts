@@ -24,7 +24,9 @@ export function useNavigationCommitSignal(registryArg?: NavigationStateRegistry)
   const registry = registryArg ?? getDefaultRegistry();
   const [isPending, startTransition] = useTransition();
   const startRef = useRef(startTransition);
-  startRef.current = startTransition;
+  useEffect(() => {
+    startRef.current = startTransition;
+  }, [startTransition]);
 
   useEffect(() => {
     registry.setDefaultTransition((callback) => startRef.current(callback));

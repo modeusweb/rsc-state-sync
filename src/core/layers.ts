@@ -140,9 +140,11 @@ export const urlLayer: StateLayer = {
     try {
       const params = new URLSearchParams(browser.location.search);
       params.set(key, encodeEnvelope(record));
-      // Merge the (possibly just-updated) history state so both layers compose.
-      const state = mergeHistoryState(scope, encodeEnvelope(record));
-      replaceHistoryState(state, buildUrl(params.toString()));
+      // The URL layer owns the address bar only. `history.state` is passed
+      // through untouched: neither the router-owned keys nor the history
+      // bucket of a scope that did not opt into the `history` layer may be
+      // rewritten from here.
+      replaceHistoryState(browser.history.state, buildUrl(params.toString()));
       return { ok: true };
     } catch (error) {
       return storageUnavailable("url", scope, error);

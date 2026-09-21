@@ -52,10 +52,13 @@ export interface NavigationStateOptions<T> {
    */
   writeUrl?: "capture" | "immediate";
   /**
-   * Opportunistically write a non-authoritative snapshot of the current
-   * scope into the current history entry when the state is first read.
-   * Improves back/forward when navigation happens without this library.
-   * Default: `true`.
+   * Keep the history entry the user is *currently on* up to date with a
+   * non-authoritative snapshot (debounced, never overwriting a snapshot
+   * produced by a real navigation capture).
+   *
+   * This is what makes back/forward work when the app navigates without a
+   * transaction — a plain `<Link>`, a router API the library was not told
+   * about, a full page load. Default: `true`.
    */
   enrichHistory?: boolean;
   /** Report (instead of swallow) recoverable errors. */
@@ -198,7 +201,17 @@ export interface RegistryEntry {
   readonly usesUrl: boolean;
 }
 
-export type CaptureMode = "leave" | "url" | "all" | "idle";
+/**
+ * Which layers a capture touches.
+ *
+ * - `all`: every configured layer (`capture`, `replaceState`).
+ * - `leave`: everything except `url` (the leaving history entry, before the
+ *   router swaps entries).
+ * - `url`: the `url` layer only (after the navigation commits).
+ * - `enrich`: a non-authoritative snapshot of the current history entry.
+ * - `idle`: opportunistic, non-authoritative write of the `session` layer.
+ */
+export type CaptureMode = "leave" | "url" | "all" | "idle" | "enrich";
 
 export interface NavigationStateRegistry {
   /** Get (or create) the handle for `scope`. The first registration wins its options. */
