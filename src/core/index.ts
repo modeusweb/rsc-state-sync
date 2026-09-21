@@ -27,26 +27,18 @@ export type {
   StoredRecord,
 } from "./types.js";
 
-import { createRegistry } from "./registry.js";
-import { setSharedRegistry } from "./navigate.js";
-import type { NavigationStateRegistry } from "./types.js";
-
-let shared: NavigationStateRegistry | null = null;
+import { getDefaultRegistry as getDefaultRegistryImpl, setDefaultRegistry as setDefaultRegistryImpl } from "./navigate.js";
 
 /**
  * The process-wide default registry used by `navigateWithState` and the
  * framework adapters when no explicit registry is passed.
+ * Created lazily on first access.
  */
-export function getDefaultRegistry(): NavigationStateRegistry {
-  if (!shared) {
-    shared = createRegistry();
-    setSharedRegistry(shared);
-  }
-  return shared;
+export function getDefaultRegistry() {
+  return getDefaultRegistryImpl();
 }
 
 /** Replaces (or removes) the default registry. Mostly for tests and HMR. */
-export function setDefaultRegistry(registry: NavigationStateRegistry | null): void {
-  shared = registry;
-  setSharedRegistry(registry);
+export function setDefaultRegistry(registry: ReturnType<typeof getDefaultRegistry> | null): void {
+  setDefaultRegistryImpl(registry);
 }

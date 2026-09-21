@@ -54,7 +54,7 @@ export function createHandle<T>(
   const ttl = options.ttl ?? 0;
   const isEqual = options.isEqual ?? Object.is;
   const writeUrl = options.writeUrl ?? "capture";
-  const enrichHistory = options.enrichHistory !== false;
+  const enrichHistory = options.enrichHistory === true;
   const strict = options.strict === true;
   const ephemeral = resolveLayerNames(options.persist).length === 0;
 
