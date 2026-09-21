@@ -78,7 +78,7 @@ describe("core/history", () => {
 
   it("enriches the current history entry after setState (plain <Link> safety)", async () => {
     const registry = createRegistry();
-    const handle = registry.get("hist/enrich", { q: "" }, { persist: ["history"] });
+    const handle = registry.get("hist/enrich", { q: "" }, { persist: ["history"], enrichHistory: true });
     handle.setState({ q: "react" });
     // schedulePersist debounces the enrichment write by one tick.
     await new Promise((resolve) => setTimeout(resolve, 0));

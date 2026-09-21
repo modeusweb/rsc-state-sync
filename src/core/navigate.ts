@@ -1,5 +1,6 @@
 import { DEFAULT_COMMIT_TIMEOUT } from "./constants.js";
 import { getStartViewTransition, supportsViewTransitions } from "./view-transition.js";
+import { createRegistry } from "./registry.js";
 import type {
   BeginNavigationOptions,
   NavigationResult,
@@ -93,15 +94,21 @@ export function navigateWithState(
  * registry (and stay tree-shakeable for registry-per-app consumers).
  */
 let sharedRegistry: NavigationStateRegistry | null = null;
-export function setSharedRegistry(registry: NavigationStateRegistry | null): void {
+
+export function getDefaultRegistry(): NavigationStateRegistry {
+  return defaultRegistryRef();
+}
+
+export function setDefaultRegistry(registry: NavigationStateRegistry | null): void {
   sharedRegistry = registry;
 }
+
 function defaultRegistryRef(): NavigationStateRegistry {
   if (!sharedRegistry) {
-    // Lazy import avoided on purpose; the index wires this up.
-    throw new Error(
-      "rsc-state-sync: no default registry. Import from 'rsc-state-sync' (or 'rsc-state-sync/react') once, or pass { registry }.",
-    );
+    // Lazy init: create a default registry on first use. This allows
+    // consumers to import from subpaths (e.g. 'rsc-state-sync/react') without
+    // explicitly importing the root entry first.
+    sharedRegistry = createRegistry();
   }
   return sharedRegistry;
 }

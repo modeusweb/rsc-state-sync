@@ -58,7 +58,7 @@ export interface NavigationStateOptions<T> {
    *
    * This is what makes back/forward work when the app navigates without a
    * transaction — a plain `<Link>`, a router API the library was not told
-   * about, a full page load. Default: `true`.
+   * about, a full page load. Default: `false` (opt-in).
    */
   enrichHistory?: boolean;
   /** Report (instead of swallow) recoverable errors. */
