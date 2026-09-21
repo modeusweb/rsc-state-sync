@@ -14,6 +14,7 @@ demo/dev.log
 # IDE / editor
 .vscode/
 .idea/
+.kilo/
 
 # CI / scripts
 .github/
