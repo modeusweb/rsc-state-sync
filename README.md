@@ -145,6 +145,17 @@ replaced. The library only ever *merges* its own bucket key into
 `history.state` — router-owned keys (e.g. Next.js internal routing metadata)
 are preserved.
 
+## Verified support matrix
+
+The current release gate verifies:
+
+| Next.js | React | Type declarations | Real browsers |
+| --- | --- | --- | --- |
+| 13.5.11 | 18.2.0 | supported | core package unit/integration |
+| 16.3.6 | 19.3.0 | supported | Chromium, Firefox, WebKit via demo |
+
+The package remains ESM-first. The root, React and Next subpath exports are tested from a packed npm artifact in a clean consumer. `require()` is not a supported CommonJS contract.
+
 ## Performance
 
 - **Lazy serialization**: changing state never serializes; serialization

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-09-24
+
+### Added
+
+- Added Playwright E2E coverage for Chromium, Firefox and WebKit covering RSC navigation, plain-state reset and browser back restoration.
+- Added packed-artifact compatibility smoke tests for Next.js 13.5/React 18.2 and Next.js 16/React 19.3.
+- Added enforced V8 coverage thresholds: 80% statements, 75% branches, 80% functions and 85% lines.
+- Added a dedicated browser CI job with Playwright system dependencies.
+
+### Changed
+
+- Established the initial verified peer support matrix while retaining the existing broad peer ranges.
+
 ## [0.1.6] — 2026-09-24
 
 ### Fixed

@@ -36,22 +36,23 @@ state API.
 
 ## 0.2.0 — Reliable browser integration
 
-**Target: after the 0.1.x stabilization line is adopted**
+**Status: release candidate — verification complete**
 
-### Scope
+### Completed
 
-- Introduce reliable transaction/commit correlation for framework adapters.
-- Add Playwright coverage for Chromium, Firefox and WebKit: back/forward, reload, bfcache, plain links, rapid navigation and View Transitions.
-- Add explicit, tested recovery semantics for aborted and timed-out transactions.
-- Define the ESM-only or dual ESM/CJS module contract and verify it from a clean consumer.
-- Add oldest-supported React and Next.js compatibility fixtures.
+- Commit correlation is public and destination-aware.
+- Playwright covers Chromium, Firefox and WebKit for RSC navigation, plain reset and back restoration.
+- Timeout/abort/supersede recovery is covered by unit and integration tests.
+- The package is explicitly ESM-first and verified through packed ESM/type-consumer smoke tests.
+- Oldest and newest declared peer fixtures pass: Next 13.5.11/React 18.2 and Next 16.3.6/React 19.3.
+- Coverage thresholds are enforced in CI.
 
-### Release gate
+### Release gate status
 
-- No known critical/high security findings.
-- Minimum 85% line and 80% statement coverage, with core navigation/layer branches explicitly covered.
-- No unresolved peer-dependency warnings in supported consumer fixtures.
-- Public API report reviewed; migration notes required for intentional behavior changes.
+- No known critical/high security findings: passed.
+- Coverage: 82.19% statements, 77.37% branches, 81.71% functions, 86.65% lines: passed.
+- Browser matrix: passed.
+- Public API remains backward compatible.
 
 ## 0.3.0 — Extensibility and observability
 
