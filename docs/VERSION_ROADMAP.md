@@ -92,7 +92,7 @@ state API.
 
 ## 1.0.0 — Stable release
 
-**Status: release candidate — all gates scheduled in this release**
+**Status: published — stable support line**
 
 - Core, React and Next.js APIs are stable for the 1.x line.
 - Browser and peer matrix is automated.
