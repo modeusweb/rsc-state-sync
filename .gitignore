@@ -16,10 +16,10 @@ demo/dev.log
 .idea/
 .kilo/
 
-# CI / scripts
-.github/
-scripts/
+# Local editor worktrees
 
-# lockfiles
-package-lock.json
+# Dependencies are committed for application lockfile reproducibility.
+# These exceptions override common user-level package-lock ignore rules.
+!package-lock.json
+!demo/package-lock.json
 

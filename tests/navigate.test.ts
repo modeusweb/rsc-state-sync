@@ -55,6 +55,36 @@ describe("core/navigate", () => {
     registry.dispose();
   });
 
+  it("settles a synchronous navigation error without waiting for timeout", async () => {
+    const registry = createRegistry();
+    registry.get("nav/throw", 0, { persist: ["memory"] });
+    const error = new Error("router failed");
+    const promise = navigateWithState(() => {
+      throw error;
+    }, { registry });
+
+    const result = await promise;
+    expect(result.error).toBe(error);
+    expect(result.aborted).toBe(true);
+    expect(result.committed).toBe(false);
+    expect(registry.status().pending).toBe(0);
+    registry.dispose();
+  });
+
+  it("treats a rejected navigation promise as unsuccessful", async () => {
+    const registry = createRegistry();
+    registry.get("nav/reject", 0, { persist: ["memory"] });
+    const error = new Error("navigation rejected");
+    const promise = navigateWithState(() => Promise.reject(error), { registry });
+
+    const result = await promise;
+    expect(result.error).toBe(error);
+    expect(result.aborted).toBe(true);
+    expect(result.committed).toBe(false);
+    expect(registry.status().pending).toBe(0);
+    registry.dispose();
+  });
+
   it("times out with a committed=false result", async () => {
     vi.useFakeTimers();
     const registry = createRegistry();

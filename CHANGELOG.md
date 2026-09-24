@@ -5,6 +5,28 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.1.4] — 2026-09-24
+
+### Fixed
+
+- Fixed synchronous and rejected navigation promises to settle as unsuccessful instead of timing out or being reported as committed.
+
+### Changed
+
+- Updated the development toolchain to ESLint 10, Vite 8, Vitest 5 and Next.js 16.
+- Restored tracked lockfiles, CI configuration and release scripts for reproducible builds.
+- Added explicit coverage verification and Next.js demo checks to the quality gate.
+- Kept the Node.js 18.18 runtime baseline and moved the development CI baseline to Node 22.22.2 for the updated toolchain.
+- Corrected persistence preset documentation.
+
+## [0.1.3] — 2026-09-21
+
+### Changed
+
+- Updated package metadata and prepared the initial 0.1.3 release.
+
 ## [0.1.2] — 2026-09-21
 
 ### Fixed
@@ -27,5 +49,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `useNavigateWithState`).
 - Size budget in `benchmarks/size.mjs` (`SIZE_BUDGET_KIB`, default 12 KiB gz).
 - GitHub Actions CI (lint, typecheck, tests, build, size budget on Node 20/22/24).
-- Release hygiene: `prepack` rebuilds `dist`, `prepublishOnly` runs the full
-  quality gate, sourcemaps are excluded from the npm tarball.
+- Release hygiene: `prepack` rebuilds `dist`, and `prepublishOnly` runs the full quality gate.

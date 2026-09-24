@@ -52,15 +52,20 @@ export function navigateWithState(
 
   const start = (): void => {
     let maybe: void | Promise<unknown> = undefined;
-    registry.defaultTransition(() => {
-      maybe = navigate();
-    });
+    try {
+      registry.defaultTransition(() => {
+        maybe = navigate();
+      });
+    } catch (error) {
+      registry.notifyCommit(token.sequence, { error, aborted: true });
+      return;
+    }
     if (isPromiseLike(maybe)) {
       // Some routers resolve when the transition has fully landed; use that
-      // as an extra commit signal.
+      // as an extra commit signal. Rejection settles without a commit.
       maybe.then(
         () => registry.notifyCommit(token.sequence),
-        (error: unknown) => registry.notifyCommit(token.sequence, { error }),
+        (error: unknown) => registry.notifyCommit(token.sequence, { error, aborted: true }),
       );
     }
   };

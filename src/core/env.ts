@@ -31,15 +31,14 @@ function detect(): BrowserEnv | null {
   if (typeof document === "undefined") return null;
   const history = window.history;
   if (!history || typeof history.replaceState !== "function") return null;
-  let sessionStorage: Storage | null = null;
   try {
-    sessionStorage = window.sessionStorage ?? null;
+    const storage = window.sessionStorage ?? null;
     // Some browsers throw (or return dead storages) in privacy mode.
-    if (sessionStorage) sessionStorage.getItem("__probe__");
+    if (storage) storage.getItem("__probe__");
+    return { history, location: window.location, sessionStorage: storage };
   } catch {
-    sessionStorage = null;
+    return { history, location: window.location, sessionStorage: null };
   }
-  return { history, location: window.location, sessionStorage };
 }
 
 export function addBrowserListener(type: string, listener: () => void): () => void {
