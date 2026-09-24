@@ -44,9 +44,10 @@ export function navigateWithState(
   options: NavigateWithStateOptions = {},
 ): Promise<NavigationResult> {
   const registry = options.registry ?? defaultRegistryRef();
-  const { commitTimeout, ...rest } = options;
+  const { commitTimeout, expectedDestination, ...rest } = options;
   const token = registry.beginNavigation({
     ...rest,
+    expectedDestination,
     commitTimeout: commitTimeout ?? DEFAULT_COMMIT_TIMEOUT,
   });
 
@@ -57,15 +58,15 @@ export function navigateWithState(
         maybe = navigate();
       });
     } catch (error) {
-      registry.notifyCommit(token.sequence, { error, aborted: true });
+      registry.notifyCommit(token.sequence, { error, aborted: true }, expectedDestination);
       return;
     }
     if (isPromiseLike(maybe)) {
       // Some routers resolve when the transition has fully landed; use that
       // as an extra commit signal. Rejection settles without a commit.
       maybe.then(
-        () => registry.notifyCommit(token.sequence),
-        (error: unknown) => registry.notifyCommit(token.sequence, { error, aborted: true }),
+        () => registry.notifyCommit(token.sequence, undefined, expectedDestination),
+        (error: unknown) => registry.notifyCommit(token.sequence, { error, aborted: true }, expectedDestination),
       );
     }
   };

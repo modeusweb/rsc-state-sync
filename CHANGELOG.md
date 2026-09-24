@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5] — 2026-09-24
+
+### Fixed
+
+- Correlated Next.js navigation commits with an explicit sequence and expected destination, preventing unrelated transitions or locations from committing the wrong transaction.
+- Preserved immediate settlement for synchronous and rejected navigation promises when destination correlation is enabled.
+
+### Added
+
+- Added a packed npm artifact smoke test covering ESM import and TypeScript declarations from a clean temporary consumer.
+- Added `npm run test:smoke` to CI and the publish quality gate.
+
 ## [0.1.4] — 2026-09-24
 
 ### Fixed

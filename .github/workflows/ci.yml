@@ -33,6 +33,8 @@ jobs:
         run: npm run build
       - name: Size budget
         run: npm run size
+      - name: Package artifact smoke test
+        run: npm run test:smoke
       - name: Install demo dependencies
         working-directory: demo
         run: npm ci

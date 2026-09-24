@@ -13,6 +13,7 @@ import type {
 
 interface InternalToken {
   sequence: number;
+  expectedDestination: string | null;
   captures: CaptureResult[];
   urlTargets: Array<NavigationState<unknown> & RegistryEntry>;
   resolve: (result: NavigationResult) => void;
@@ -52,6 +53,13 @@ export function createRegistry(): NavigationStateRegistry {
 
   function notifyStatus(): void {
     for (const listener of statusListeners) listener();
+  }
+
+  function canCommit(sequence: number, destination?: string): boolean {
+    const token = tokens.get(sequence);
+    if (!token) return false;
+    if (token.expectedDestination === null) return true;
+    return destination !== undefined && token.expectedDestination === destination;
   }
 
   function ensureBrowserListeners(): void {
@@ -120,6 +128,7 @@ export function createRegistry(): NavigationStateRegistry {
     });
     const token: InternalToken = {
       sequence,
+      expectedDestination: options.expectedDestination ?? null,
       captures,
       urlTargets,
       resolve,
@@ -185,11 +194,12 @@ export function createRegistry(): NavigationStateRegistry {
       statusListeners.clear();
     },
     beginNavigation,
-    notifyCommit(sequence, result) {
+    notifyCommit(sequence, result, destination) {
       const token = tokens.get(sequence);
-      if (!token) return;
+      if (!token || !canCommit(sequence, destination)) return;
       finishToken(token, result ?? {});
     },
+    canCommit,
     status() {
       return { pending: tokens.size, latestSequence, isNavigating: tokens.size > 0 };
     },

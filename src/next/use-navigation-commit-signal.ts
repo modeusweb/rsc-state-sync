@@ -32,6 +32,10 @@ export function useNavigationCommitSignal(registryArg?: NavigationStateRegistry)
     registry.setDefaultTransition((callback) => startRef.current(callback));
   }, [registry]);
 
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const locationKey = `${pathname}?${searchParams?.toString() ?? ""}`;
+
   // Signal 1: our own transition finished rendering.
   const wasPending = useRef(false);
   useEffect(() => {
@@ -41,20 +45,23 @@ export function useNavigationCommitSignal(registryArg?: NavigationStateRegistry)
     }
     if (wasPending.current) {
       wasPending.current = false;
-      registry.notifyCommit(registry.status().latestSequence);
+      const sequence = registry.status().latestSequence;
+      if (registry.canCommit(sequence, locationKey)) {
+        registry.notifyCommit(sequence, undefined, locationKey);
+      }
     }
-  }, [isPending, registry]);
+  }, [isPending, locationKey, registry]);
 
   // Signal 2: the URL changed (target entry is now current).
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const locationKey = `${pathname}?${searchParams?.toString() ?? ""}`;
   const previousLocation = useRef<string | null>(null);
   useEffect(() => {
     const previous = previousLocation.current;
     previousLocation.current = locationKey;
     if (previous !== null && previous !== locationKey) {
-      registry.notifyCommit(registry.status().latestSequence);
+      const sequence = registry.status().latestSequence;
+      if (registry.canCommit(sequence, locationKey)) {
+        registry.notifyCommit(sequence, undefined, locationKey);
+      }
     }
   }, [locationKey, registry]);
 }

@@ -4,7 +4,7 @@ This roadmap uses semantic versioning. A version is released only when all liste
 
 ## 0.1.4 — Maintenance release
 
-**Status: release candidate**
+**Status: published**
 
 - Updated the compatible development toolchain and restored reproducible CI/lockfiles.
 - Fixed synchronous and rejected navigation settlement semantics.
@@ -15,17 +15,23 @@ Release gate: lint, strict type-check, 56+ tests, coverage run, root/demo audits
 
 ## 0.1.x — Stabilization patches
 
-**Target: next 1–3 patch releases after 0.1.4**
+**Status: in progress — 0.1.5 release candidate**
 
-Only backward-compatible fixes should ship in this line.
+**Completed in 0.1.5**
 
-- Correlate commit signals with an explicit navigation sequence and expected destination.
-- Add packed-package ESM and declaration-consumer smoke tests.
-- Add tests for rapid push/replace, stale commits, timeout recovery and storage failures.
-- Correct or document ESM/CJS export behavior.
+- Correlates Next.js commit signals with an explicit navigation sequence and expected destination.
+- Adds a packed-package ESM/declaration smoke test to CI and publish gates.
+- Covers wrong-destination, matching-destination, synchronous-error and rejected-navigation behavior.
+
+**Remaining in 0.1.x**
+
+- Add broader storage-failure and rapid navigation regression fixtures.
+- Add explicit timeout recovery documentation and tests.
 - Backfill npm metadata, changelog links and release tags for every published version.
 
-Patch policy: no new public API, no intentional breaking defaults, patch bump, full quality gate and registry verification required.
+0.1.5 is the current stabilization release candidate. It adds sequence/destination
+commit correlation and packed-artifact verification without changing the core
+state API.
 
 ## 0.2.0 — Reliable browser integration
 

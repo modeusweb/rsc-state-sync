@@ -107,8 +107,8 @@ useServerNavigationState("catalog/filters", DEFAULT_FILTERS, {
 
 Navigation is a transaction. Every navigation gets a monotonic sequence; a
 newer navigation supersedes all in-flight ones (their snapshots cannot claim
-the shared layers and their commits are ignored), commits are detected by the
-Next.js adapter (end of `useTransition` + location change), and each
+shared layers and their commits are ignored). Framework adapters may provide
+an expected destination, which is checked before a commit is accepted. Each
 transaction has a timeout and optional `AbortSignal`:
 
 ```ts
@@ -116,9 +116,16 @@ const controller = new AbortController();
 await navigateWithState(() => router.push("/products"), { signal: controller.signal });
 ```
 
-Out-of-order RSC responses therefore cannot overwrite newer state:
-`request A → request B → response B → response A` results in B winning, and a
-late commit from A is a no-op.
+Transactions with an expected destination are not committed by a transition or
+location change for another URL. Plain `<Link>` navigation remains supported
+through the adapter's location fallback. A timeout returns
+`committed: false` and `timedOut: true`; the leaving-entry snapshot is retained
+for recovery, while target URL parameters are not written.
+
+`expectedDestination` is an internal low-level option used by framework adapters.
+The Next.js wrapper derives it automatically for `push` and `replace`; callers
+using `navigateWithState` directly can provide a normalized pathname plus query
+string when their adapter knows the destination.
 
 ## View Transitions
 

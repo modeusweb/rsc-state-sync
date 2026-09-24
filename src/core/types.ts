@@ -140,6 +140,8 @@ export interface NavigationToken {
 export interface BeginNavigationOptions {
   /** Scopes to capture, or `"*"` for every registered scope. */
   scopes?: string[] | "*";
+  /** Expected target location used by framework adapters to correlate commits. */
+  expectedDestination?: string;
   /** Write authoritative snapshots into the current history entry. Default `true`. */
   historyUpdate?: boolean;
   /** Write URL parameters onto the target entry. Default `true`. */
@@ -227,7 +229,9 @@ export interface NavigationStateRegistry {
   /** Start a navigation transaction: capture scopes and return a settle token. */
   beginNavigation(options?: BeginNavigationOptions): NavigationToken;
   /** Resolve the commit signal of a navigation (called by framework adapters). */
-  notifyCommit(sequence: number, result?: Partial<NavigationResult>): void;
+  notifyCommit(sequence: number, result?: Partial<NavigationResult>, destination?: string): void;
+  /** Check whether a commit signal matches the transaction's expected destination. */
+  canCommit(sequence: number, destination?: string): boolean;
   status(): NavigationStatus;
   subscribeStatus(listener: () => void): () => void;
   /** Pluggable transition runner (React adapters install `startTransition`). */

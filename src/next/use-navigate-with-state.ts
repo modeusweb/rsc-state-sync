@@ -43,16 +43,22 @@ export function useNavigateWithState(
   });
 
   const run = useCallback(
-    (action: (router: ReturnType<typeof useRouter>) => void, options?: StateNavigationOptions) => {
+    (action: (router: ReturnType<typeof useRouter>) => void, options?: StateNavigationOptions, href?: string) => {
       const merged = { ...optionsRef.current, ...options };
-      return navigateWithState(() => action(routerRef.current), merged);
+      const expectedDestination = href === undefined
+        ? undefined
+        : (() => {
+            const url = new URL(href, window.location.href);
+            return `${url.pathname}${url.search}`;
+          })();
+      return navigateWithState(() => action(routerRef.current), { ...merged, expectedDestination });
     },
     [],
   );
 
   return {
-    push: (href, options) => run((r) => r.push(href, { scroll: options?.scroll }), options),
-    replace: (href, options) => run((r) => r.replace(href, { scroll: options?.scroll }), options),
+    push: (href, options) => run((r) => r.push(href, { scroll: options?.scroll }), options, href),
+    replace: (href, options) => run((r) => r.replace(href, { scroll: options?.scroll }), options, href),
     back: (options) => run((r) => r.back(), options),
     forward: (options) => run((r) => r.forward(), options),
   };

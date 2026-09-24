@@ -35,6 +35,7 @@ describe("next/useNavigationCommitSignal", () => {
 
   afterEach(() => {
     registry.dispose();
+    vi.useRealTimers();
   });
 
   it("installs the registry default transition on mount", () => {
@@ -61,6 +62,33 @@ describe("next/useNavigationCommitSignal", () => {
     const result = await token.promise;
     expect(result.committed).toBe(true);
     expect(result.timedOut).toBe(false);
+  });
+
+  it("does not commit a transaction at the wrong destination", async () => {
+    vi.useFakeTimers();
+    const token = registry.beginNavigation({ expectedDestination: "/catalog?page=2", commitTimeout: 20 });
+    const { rerender } = renderHook(() => useNavigationCommitSignal(registry));
+    act(() => {
+      mockPathname = "/catalog";
+      mockSearch = "page=3";
+      rerender();
+    });
+    expect(registry.status().pending).toBe(1);
+    await vi.advanceTimersByTimeAsync(21);
+    const result = await token.promise;
+    expect(result.committed).toBe(false);
+    expect(result.timedOut).toBe(true);
+  });
+
+  it("commits the matching destination", async () => {
+    const token = registry.beginNavigation({ expectedDestination: "/catalog?page=2" });
+    const { rerender } = renderHook(() => useNavigationCommitSignal(registry));
+    act(() => {
+      mockSearch = "page=2";
+      rerender();
+    });
+    const result = await token.promise;
+    expect(result.committed).toBe(true);
   });
 
   it("stamps the URL layer onto the target entry after the location-change commit", async () => {
@@ -97,6 +125,7 @@ describe("next/useNavigateWithState", () => {
 
   afterEach(() => {
     registry.dispose();
+    vi.useRealTimers();
   });
 
   it("routes through the Next.js router inside a transaction (times out without a commit)", async () => {
