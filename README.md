@@ -175,6 +175,10 @@ The default serializer automatically escapes application objects containing the
 reserved `$rss` key. Custom serializers remain available for application-specific
 binary formats and encryption.
 
+## Security and support
+
+See [`SECURITY.md`](./SECURITY.md), [`docs/SUPPORT.md`](./docs/SUPPORT.md) and [`docs/UPGRADE.md`](./docs/UPGRADE.md). Diagnostics and custom layers are opt-in and should not receive secrets.
+
 ## Adapter capabilities
 
 Use `getAdapterCapabilities()` or `listAdapterCapabilities()` to inspect runtime support metadata. `core`, `react` and `next` are supported; `react-router` and `remix` are candidates pending dedicated browser fixtures and adapter ownership.

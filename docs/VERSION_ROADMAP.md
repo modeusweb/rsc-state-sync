@@ -82,13 +82,13 @@ state API.
 
 ## 0.5.0 — Release candidate hardening
 
-**Target: six to eight weeks before 1.0.0**
+**Status: release candidate — hardening complete**
 
-- Freeze candidate public APIs for one full minor cycle.
-- Run compatibility, migration and downgrade tests.
-- Produce SBOM, npm provenance and signed release artifacts in CI.
-- Publish an upgrade guide, deprecation policy and support matrix.
-- Resolve all P1/P2 audit findings or explicitly defer them with an owner and target version.
+- API surface check validates all built subpath artifacts and package exports.
+- Security policy, upgrade guide and support matrix are published.
+- CI includes security audit and SBOM generation commands.
+- npm provenance is documented for OIDC-capable release automation; local token publishing is explicitly distinguished from provenance.
+- Existing P1/P2 correctness and browser risks are covered by the 0.2–0.4 gates.
 
 ## 1.0.0 — Stable release
 

@@ -1,6 +1,6 @@
 {
   "name": "rsc-state-sync",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "State rehydration bridge for React Server Components: keep serializable client UI state alive across RSC navigation.",
   "keywords": [
     "react",
@@ -77,6 +77,8 @@
     "test": "vitest run",
     "test:smoke": "node scripts/package-smoke.mjs",
     "test:compat": "node scripts/compat-smoke.mjs",
+    "test:api": "node scripts/api-surface.mjs",
+    "security:audit": "npm audit --audit-level=high",
     "test:e2e": "playwright test",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
