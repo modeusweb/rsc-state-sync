@@ -177,7 +177,7 @@ binary formats and encryption.
 
 ## Security and support
 
-See [`SECURITY.md`](./SECURITY.md), [`docs/SUPPORT.md`](./docs/SUPPORT.md) and [`docs/UPGRADE.md`](./docs/UPGRADE.md). Diagnostics and custom layers are opt-in and should not receive secrets.
+See [`SECURITY.md`](./SECURITY.md), [`docs/SUPPORT.md`](./docs/SUPPORT.md), [`docs/UPGRADE.md`](./docs/UPGRADE.md) and [`docs/DEPRECATIONS.md`](./docs/DEPRECATIONS.md). Diagnostics and custom layers are opt-in and should not receive secrets.
 
 ## Adapter capabilities
 

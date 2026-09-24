@@ -92,14 +92,13 @@ state API.
 
 ## 1.0.0 — Stable release
 
-1.0.0 is released only when:
+**Status: release candidate — all gates scheduled in this release**
 
-- Core, React and supported framework adapters are API-stable.
-- The full browser and supported peer matrix passes from a clean install.
-- The packed npm artifact is tested as an external dependency.
-- No unresolved critical/high security findings or known data-loss/race defects remain.
-- Performance and bundle budgets pass in CI.
-- Semver, deprecation, security and release policies are published.
+- Core, React and Next.js APIs are stable for the 1.x line.
+- Browser and peer matrix is automated.
+- Packed ESM/type artifact is tested from clean consumers.
+- Security, support, upgrade and deprecation policies are published.
+- Performance and bundle budgets are enforced.
 
 ## Deferred post-1.0 work
 

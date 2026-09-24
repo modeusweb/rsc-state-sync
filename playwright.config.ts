@@ -15,7 +15,7 @@ export default defineConfig({
     command: "npm run start",
     cwd: "demo",
     url: "http://127.0.0.1:3210",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
   },
   projects: [

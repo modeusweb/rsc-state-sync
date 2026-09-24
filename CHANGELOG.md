@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-09-24
+
+### Added
+
+- Published the stable ESM-first API contract and formal deprecation policy.
+- Stabilized core, React and Next.js adapter capability guarantees.
+
+### Changed
+
+- Promoted the verified Next.js/React peer and browser matrix to the stable support contract.
+- Documented migration, security, support and release policies for the 1.x line.
+
 ## [0.5.0] — 2026-09-24
 
 ### Added
