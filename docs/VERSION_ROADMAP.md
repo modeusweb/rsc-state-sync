@@ -73,14 +73,12 @@ state API.
 
 ## 0.4.0 — Framework ecosystem
 
-**Target: after 0.3.0 API stabilization**
+**Status: release candidate — capability contract complete**
 
-- Evaluate React Router, Remix and additional RSC router adapters without coupling core to frameworks.
-- Add framework conformance fixtures and adapter capability reporting.
-- Add compatibility automation across the oldest and newest supported peer versions.
-- Publish architecture decision records for adapter boundaries and transaction ownership.
-
-Skip this version if adapter scope cannot be maintained without destabilizing the core API.
+- Core, React and Next.js are supported adapters with destination correlation and real-browser coverage.
+- React Router and Remix are reported as candidates; no unsupported runtime adapter is shipped.
+- Adapter boundaries and ownership are recorded in `docs/adr/0001-adapter-boundaries.md`.
+- Conformance types and capability metadata are tested from the core entry point.
 
 ## 0.5.0 — Release candidate hardening
 

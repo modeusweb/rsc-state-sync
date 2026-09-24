@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-09-24
+
+### Added
+
+- Added public adapter capability reporting for core, React, Next.js, React Router and Remix.
+- Added compile-time conformance coverage and documented adapter support status.
+- Added ADR-0001 defining framework adapter boundaries and maintenance ownership.
+
+### Changed
+
+- React Router and Remix remain explicit candidates without adding runtime dependencies to the core package.
+
 ## [0.3.0] — 2026-09-24
 
 ### Added

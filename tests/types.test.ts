@@ -1,4 +1,5 @@
-import { describe, expectTypeOf, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
+import { getAdapterCapabilities, listAdapterCapabilities } from "../src/core/index.js";
 import type { NavigationState } from "../src/core/index.js";
 import type { UseServerNavigationStateResult } from "../src/react/use-server-navigation-state.js";
 
@@ -17,6 +18,21 @@ describe("types (compile-time)", () => {
         handle: NavigationState<Filters>,
       ]
     >();
+  });
+
+  it("reports supported and candidate framework adapters", () => {
+    const adapters = listAdapterCapabilities();
+    expect(adapters.find((adapter) => adapter.name === "next")).toMatchObject({
+      support: "supported",
+      destinationCorrelation: true,
+      realBrowserCoverage: true,
+    });
+    expect(adapters.find((adapter) => adapter.name === "remix")).toMatchObject({
+      support: "candidate",
+      destinationCorrelation: false,
+      realBrowserCoverage: false,
+    });
+    expect(getAdapterCapabilities("core").stateCapture).toBe(true);
   });
 
   it("keeps primitive state types exact", () => {

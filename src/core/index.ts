@@ -1,10 +1,12 @@
 export { ENVELOPE_FORMAT, HISTORY_STATE_KEY, PRESET_LAYERS, DEFAULT_MAX_CHARS, defaultUrlKey } from "./constants.js";
 export { StateSyncError, isStateSyncError } from "./errors.js";
 export { createRegistry } from "./registry.js";
+export { getAdapterCapabilities, listAdapterCapabilities } from "./adapter.js";
 export { navigateWithState, type NavigateWithStateOptions } from "./navigate.js";
 export { createJsonSerializer, jsonSerializer } from "./serializer.js";
 export { supportsViewTransitions } from "./view-transition.js";
 export { createMemoryLayer, historyLayer, sessionLayer, urlLayer } from "./layers.js";
+export type { AdapterCapabilities, AdapterName, AdapterSupport } from "./adapter.js";
 export type {
   BeginNavigationOptions,
   BuiltInStorageLayerName,
