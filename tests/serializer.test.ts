@@ -113,12 +113,10 @@ describe("core/serializer", () => {
     expect(restored.rows[0].note).toBeUndefined();
   });
 
-  it("documents the tag-collision contract ($rss)", () => {
-    // A payload that literally contains `$rss` keys is claimed by the tag layer;
-    // a custom serializer is required for such data.
+  it("escapes user objects that contain the reserved $rss key", () => {
     const s = createJsonSerializer<{ a: unknown }>();
-    const restored = s.deserialize(s.serialize({ a: { $rss: "nan" } }));
-    expect(Number.isNaN(restored.a as number)).toBe(true);
+    const restored = s.deserialize(s.serialize({ a: { $rss: "nan", nested: { value: 1 } } }));
+    expect(restored.a).toEqual({ $rss: "nan", nested: { value: 1 } });
   });
 
   it("allows a per-slot serialized instance", () => {

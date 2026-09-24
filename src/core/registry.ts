@@ -1,6 +1,6 @@
 import { addBrowserListener } from "./env.js";
 import { createHandle, type HandleContext } from "./handle.js";
-import { createMemoryLayer } from "./layers.js";
+import { createMemoryLayer, getSharedLayer } from "./layers.js";
 import type {
   BeginNavigationOptions,
   CaptureResult,
@@ -9,6 +9,9 @@ import type {
   NavigationResult,
   NavigationToken,
   RegistryEntry,
+  RegistryOptions,
+  StateLayer,
+  StorageLayerName,
 } from "./types.js";
 
 interface InternalToken {
@@ -41,7 +44,10 @@ function resolveTargets(
  * - the browser `popstate` listener (installed lazily, once);
  * - the navigation transaction bookkeeping (sequence + supersede rules).
  */
-export function createRegistry(): NavigationStateRegistry {
+export function createRegistry(registryOptions: RegistryOptions = {}): NavigationStateRegistry {
+  const customLayers = new Map<string, StateLayer>(
+    Object.entries(registryOptions.layers ?? {}).map(([name, layer]) => [name, { ...layer, name }]),
+  );
   const handles = new Map<string, NavigationState<unknown> & RegistryEntry>();
   const memoryLayer = createMemoryLayer();
   const tokens = new Map<number, InternalToken>();
@@ -74,8 +80,16 @@ export function createRegistry(): NavigationStateRegistry {
     handles.delete(handle.scope);
   }
 
+  function getLayer(name: StorageLayerName): StateLayer {
+    if (name === "history" || name === "session" || name === "url") {
+      return getSharedLayer(name as "history" | "session" | "url");
+    }
+    return customLayers.get(name) ?? getSharedLayer(name as "history" | "session" | "url");
+  }
+
   const ctx: HandleContext = {
     memoryLayer,
+    getLayer,
     nextSequence: () => (latestSequence += 1),
     ensureBrowserListeners,
     unregister,
@@ -105,6 +119,12 @@ export function createRegistry(): NavigationStateRegistry {
       usedViewTransition: partial.usedViewTransition === true,
       captures,
       ...partial,
+    });
+    registryOptions.diagnostics?.({
+      type: "navigation:settle",
+      sequence: token.sequence,
+      outcome: superseded ? "superseded" : aborted ? "aborted" : partial.timedOut === true ? "timedOut" : "committed",
+      pending: tokens.size,
     });
     notifyStatus();
   }
@@ -151,6 +171,12 @@ export function createRegistry(): NavigationStateRegistry {
         signal.addEventListener("abort", token.onAbort, { once: true });
       }
     }
+    registryOptions.diagnostics?.({
+      type: "navigation:start",
+      sequence,
+      scopes: targets.map((handle) => handle.scope),
+      expectedDestination: options.expectedDestination ?? null,
+    });
     notifyStatus();
     return {
       sequence,

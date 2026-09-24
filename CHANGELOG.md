@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-09-24
+
+### Added
+
+- Added registry-provided custom state layers through `createRegistry({ layers })`.
+- Added opt-in structured navigation diagnostics through `createRegistry({ diagnostics })`; events contain metadata only and never user state values.
+- Added automatic escaping for application objects containing the reserved `$rss` serializer key.
+
+### Changed
+
+- Documented custom layers, diagnostics privacy boundaries and serializer collision behavior.
+
 ## [0.2.0] — 2026-09-24
 
 ### Added

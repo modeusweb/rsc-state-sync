@@ -1,7 +1,7 @@
 import { DEFAULT_MAX_CHARS, PRESET_LAYERS, defaultUrlKey } from "./constants.js";
 import { StateSyncError } from "./errors.js";
 import { getBrowser, isBrowser } from "./env.js";
-import { getSharedLayer, historyLayer } from "./layers.js";
+import { historyLayer } from "./layers.js";
 import { createJsonSerializer } from "./serializer.js";
 import type {
   CaptureMode,
@@ -17,6 +17,7 @@ import type {
 
 export interface HandleContext {
   memoryLayer: StateLayer;
+  getLayer(name: StorageLayerName): StateLayer;
   nextSequence(): number;
   ensureBrowserListeners(): void;
   unregister(handle: RegistryEntry): void;
@@ -60,7 +61,7 @@ export function createHandle<T>(
 
   const names = resolveLayerNames(options.persist);
   const layers: StateLayer[] = names.map((name) =>
-    name === "memory" ? ctx.memoryLayer : getSharedLayer(name),
+    name === "memory" ? ctx.memoryLayer : ctx.getLayer(name),
   );
   const urlKey = options.urlKey ?? defaultUrlKey(scope);
   const keyFor = (layer: StateLayer): string => (layer.name === "url" ? urlKey : scope);
@@ -227,7 +228,7 @@ export function createHandle<T>(
     const authoritative = mode !== "idle" && mode !== "enrich";
     let payload: string | null = null;
     for (const name of wanted) {
-      const layer = name === "memory" ? ctx.memoryLayer : getSharedLayer(name);
+      const layer = name === "memory" ? ctx.memoryLayer : ctx.getLayer(name);
       const record: StoredRecord = { v: version, r: revision, t: timestamp, a: authoritative };
       if (name === "memory") {
         record.value = state;

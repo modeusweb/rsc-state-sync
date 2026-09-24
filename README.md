@@ -145,6 +145,36 @@ replaced. The library only ever *merges* its own bucket key into
 `history.state` — router-owned keys (e.g. Next.js internal routing metadata)
 are preserved.
 
+## Extensibility and diagnostics
+
+Custom layers are registered per isolated registry and can be selected by name:
+
+```ts
+const registry = createRegistry({
+  layers: {
+    encrypted: {
+      name: "encrypted",
+      isAvailable: () => true,
+      read: (scope, key) => storage.read(`encrypted:${scope}:${key}`),
+      write: (scope, key, record) => storage.write(`encrypted:${scope}:${key}`, record),
+      remove: (scope, key) => storage.remove(`encrypted:${scope}:${key}`),
+      clear: () => storage.clear(),
+      cost: (_scope, _key, record) => record.payload?.length ?? 0,
+    },
+  },
+  diagnostics: (event) => metrics.record(event),
+});
+```
+
+Diagnostics are opt-in and privacy-safe: events contain navigation sequence,
+scope names, destination metadata and outcome, but never serialized or live state
+values. Treat scope names as application data and avoid logging sensitive scope
+names in production telemetry.
+
+The default serializer automatically escapes application objects containing the
+reserved `$rss` key. Custom serializers remain available for application-specific
+binary formats and encryption.
+
 ## Verified support matrix
 
 The current release gate verifies:

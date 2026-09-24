@@ -1,7 +1,8 @@
 import type { StateSyncError } from "./errors.js";
 
-/** A single persistence layer. */
-export type StorageLayerName = "url" | "history" | "memory" | "session";
+/** Built-in persistence layer names. Custom names are accepted for registry-provided layers. */
+export type BuiltInStorageLayerName = "url" | "history" | "memory" | "session";
+export type StorageLayerName = BuiltInStorageLayerName | (string & {});
 
 /**
  * Named persistence presets, or an explicit, priority-ordered list of layers.
@@ -214,6 +215,24 @@ export interface RegistryEntry {
  * - `idle`: opportunistic, non-authoritative write of the `session` layer.
  */
 export type CaptureMode = "leave" | "url" | "all" | "idle" | "enrich";
+
+export type StateSyncDiagnosticEvent =
+  | { type: "navigation:start"; sequence: number; scopes: string[]; expectedDestination: string | null }
+  | {
+      type: "navigation:settle";
+      sequence: number;
+      outcome: "committed" | "superseded" | "aborted" | "timedOut";
+      pending: number;
+    };
+
+export type StateSyncDiagnosticSink = (event: StateSyncDiagnosticEvent) => void;
+
+export interface RegistryOptions {
+  /** Custom named layers available to `persist` strategies in this registry. */
+  layers?: Record<string, StateLayer>;
+  /** Opt-in structured diagnostics. Events never contain user state values. */
+  diagnostics?: StateSyncDiagnosticSink;
+}
 
 export interface NavigationStateRegistry {
   /** Get (or create) the handle for `scope`. The first registration wins its options. */

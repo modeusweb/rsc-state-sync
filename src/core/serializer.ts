@@ -2,15 +2,14 @@ import type { StateSerializer } from "./types.js";
 
 /**
  * Property key used to tag values that plain JSON cannot represent.
- * It is intentionally obscure; if it collides with real application data,
- * provide a custom `StateSerializer`.
+ * User objects that contain the reserved key are escaped automatically.
  */
 const TAG = "$rss";
 
 /** Quoted form of {@link TAG} as it appears in a serialized payload. */
 const TAG_MARKER = `"${TAG}"`;
 
-type Tag = "undefined" | "nan" | "inf" | "-inf" | "bigint" | "date" | "usp";
+type Tag = "escaped" | "undefined" | "nan" | "inf" | "-inf" | "bigint" | "date" | "usp";
 
 /**
  * Sentinel returned by the reviver for `undefined`.
@@ -20,10 +19,12 @@ type Tag = "undefined" | "nan" | "inf" | "-inf" | "bigint" | "date" | "usp";
  * second pass (see {@link restoreSentinels}).
  */
 const UNDEFINED = Symbol("rsc-state-sync:undefined");
+const internalTags = new WeakSet<object>();
 
 function tag(kind: Tag, value?: unknown): Record<string, unknown> {
   const tagged: Record<string, unknown> = { [TAG]: kind };
   if (value !== undefined) tagged.value = value;
+  internalTags.add(tagged);
   return tagged;
 }
 
@@ -50,6 +51,15 @@ function replace(this: unknown, key: string, value: unknown): unknown {
     return Number.isNaN(time) ? null : tag("date", raw.toISOString());
   }
   if (raw instanceof URLSearchParams) return tag("usp", raw.toString());
+  if (
+    raw !== null &&
+    typeof raw === "object" &&
+    !Array.isArray(raw) &&
+    !internalTags.has(raw) &&
+    Object.prototype.hasOwnProperty.call(raw, TAG)
+  ) {
+    return tag("escaped", JSON.stringify(value));
+  }
   return value;
 }
 
@@ -59,6 +69,8 @@ function revive(_key: string, value: unknown): unknown {
     const kind = record[TAG];
     if (typeof kind === "string") {
       switch (kind as Tag) {
+        case "escaped":
+          return JSON.parse(record.value as string) as unknown;
         case "undefined":
           return UNDEFINED;
         case "nan":

@@ -61,6 +61,46 @@ describe("core/registry", () => {
     registry.dispose();
   });
 
+  it("uses registry-provided custom layers", () => {
+    const writes: string[] = [];
+    const registry = createRegistry({
+      layers: {
+        custom: {
+          name: "custom",
+          isAvailable: () => true,
+          read: () => null,
+          write: (_scope, _key, record) => {
+            writes.push(record.payload ?? "");
+            return { ok: true };
+          },
+          remove: () => {},
+          clear: () => {},
+          cost: (_scope, _key, record) => record.payload?.length ?? 0,
+        },
+      },
+    });
+    const handle = registry.get("custom/slot", "value", { persist: ["custom"] });
+    handle.setState("next");
+    const capture = handle.capture(1);
+    expect(capture.persisted).toEqual(["custom"]);
+    expect(writes).toHaveLength(1);
+    registry.dispose();
+  });
+
+  it("emits privacy-safe structured navigation diagnostics", async () => {
+    const events: unknown[] = [];
+    const registry = createRegistry({ diagnostics: (event) => void events.push(event) });
+    registry.get("diag/slot", 0, { persist: ["memory"] });
+    const token = registry.beginNavigation({ expectedDestination: "/target" });
+    registry.notifyCommit(token.sequence, undefined, "/target");
+    await token.promise;
+    expect(events).toEqual([
+      { type: "navigation:start", sequence: token.sequence, scopes: ["diag/slot"], expectedDestination: "/target" },
+      { type: "navigation:settle", sequence: token.sequence, outcome: "committed", pending: 0 },
+    ]);
+    registry.dispose();
+  });
+
   it("keeps in-memory state within the same registry", () => {
     const registry = createRegistry();
     const handle = registry.get("test/lazy", 0, { persist: ["memory"] });

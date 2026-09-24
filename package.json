@@ -1,6 +1,6 @@
 {
   "name": "rsc-state-sync",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "State rehydration bridge for React Server Components: keep serializable client UI state alive across RSC navigation.",
   "keywords": [
     "react",

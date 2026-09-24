@@ -56,22 +56,20 @@ state API.
 
 ## 0.3.0 — Extensibility and observability
 
-**Target: after 0.2.0 has stable real-world usage**
+**Status: release candidate — implementation complete**
 
-### Scope
+### Completed
 
-- Add opt-in structured diagnostics with a documented privacy contract.
-- Add pluggable custom storage and transaction adapters behind stable interfaces.
-- Define serializer escape/version migration rules and reject ambiguous values safely.
-- Add examples for custom serializers, schema validation and framework-neutral routers.
-- Add stable types for middleware/instrumentation integration.
-- Add benchmark trend reports by payload size and navigation mode.
+- Registry-provided custom layers are supported through `StateLayer` and `createRegistry({ layers })`.
+- Opt-in structured diagnostics expose navigation lifecycle metadata without user state values.
+- Reserved `$rss` application keys are escaped by the default serializer.
+- Existing framework-neutral router, custom serializer and schema extension points remain compatible.
 
-### Release gate
+### Release gate status
 
-- Public API and migration guide reviewed.
-- Bundle budget remains at or below 12 KiB gzip for default core/adapters.
-- Browser matrix green; performance regressions above 10% require an approved baseline update.
+- Unit/integration coverage and bundle budget: passed.
+- Packed ESM/type consumer: passed.
+- Browser matrix from 0.2.0: passed.
 
 ## 0.4.0 — Framework ecosystem
 

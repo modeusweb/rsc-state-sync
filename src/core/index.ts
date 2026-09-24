@@ -7,6 +7,7 @@ export { supportsViewTransitions } from "./view-transition.js";
 export { createMemoryLayer, historyLayer, sessionLayer, urlLayer } from "./layers.js";
 export type {
   BeginNavigationOptions,
+  BuiltInStorageLayerName,
   CaptureError,
   CaptureMode,
   CaptureResult,
@@ -19,9 +20,12 @@ export type {
   NavigationToken,
   PersistOption,
   RegistryEntry,
+  RegistryOptions,
   StateLayer,
   StateSchema,
   StateSerializer,
+  StateSyncDiagnosticEvent,
+  StateSyncDiagnosticSink,
   StorageLayerName,
   StorageStrategy,
   StoredRecord,
