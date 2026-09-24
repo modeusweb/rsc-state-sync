@@ -85,6 +85,22 @@ describe("core/navigate", () => {
     registry.dispose();
   });
 
+  it("keeps only the latest rapid navigation pending", async () => {
+    const registry = createRegistry();
+    registry.get("nav/rapid", 0, { persist: ["memory"] });
+    const first = navigateWithState(() => {}, { registry, expectedDestination: "/one" });
+    const second = navigateWithState(() => {}, { registry, expectedDestination: "/two" });
+    const third = navigateWithState(() => {}, { registry, expectedDestination: "/three" });
+    const [firstResult, secondResult] = await Promise.all([first, second]);
+    expect(firstResult.superseded).toBe(true);
+    expect(secondResult.superseded).toBe(true);
+    expect(registry.status().pending).toBe(1);
+    const sequence = registry.status().latestSequence;
+    registry.notifyCommit(sequence, undefined, "/three");
+    expect((await third).committed).toBe(true);
+    registry.dispose();
+  });
+
   it("times out with a committed=false result", async () => {
     vi.useFakeTimers();
     const registry = createRegistry();

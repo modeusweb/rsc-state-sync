@@ -15,19 +15,20 @@ Release gate: lint, strict type-check, 56+ tests, coverage run, root/demo audits
 
 ## 0.1.x — Stabilization patches
 
-**Status: in progress — 0.1.5 release candidate**
+**Status: 0.1.6 release candidate**
 
-**Completed in 0.1.5**
+**Completed in 0.1.5–0.1.6**
 
 - Correlates Next.js commit signals with an explicit navigation sequence and expected destination.
 - Adds a packed-package ESM/declaration smoke test to CI and publish gates.
 - Covers wrong-destination, matching-destination, synchronous-error and rejected-navigation behavior.
+- Covers unavailable storage, rapid superseding navigations and timeout recovery.
+- Backfills historical release tags from npm `gitHead` metadata.
 
-**Remaining in 0.1.x**
+**Remaining before 0.2.0**
 
-- Add broader storage-failure and rapid navigation regression fixtures.
-- Add explicit timeout recovery documentation and tests.
-- Backfill npm metadata, changelog links and release tags for every published version.
+- Add oldest-supported React/Next compatibility fixtures.
+- Add real-browser E2E matrix and ESM module-contract verification.
 
 0.1.5 is the current stabilization release candidate. It adds sequence/destination
 commit correlation and packed-artifact verification without changing the core

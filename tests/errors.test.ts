@@ -66,6 +66,28 @@ describe("core/errors", () => {
     registry.dispose();
   });
 
+  it("reports unavailable storage without breaking live state", () => {
+    const registry = createRegistry();
+    const errors: unknown[] = [];
+    const storage = fakeSessionStorage();
+    const setItem = storage.setItem;
+    storage.setItem = () => {
+      throw new DOMException("quota exceeded", "QuotaExceededError");
+    };
+    const handle = registry.get("err/storage", "initial", {
+      persist: ["session"],
+      onError: (error) => void errors.push(error),
+    });
+    handle.setState("live");
+    const capture = handle.capture(1);
+    expect(handle.getState()).toBe("live");
+    expect(capture.persisted).not.toContain("session");
+    expect(capture.skipped.map((entry) => entry.layer)).toContain("session");
+    expect(errors.length).toBeGreaterThan(0);
+    storage.setItem = setItem;
+    registry.dispose();
+  });
+
   it("applies schema validation on restore", () => {
     fakeSessionStorage().setItem(
       "__rscStateSync:err/schema",

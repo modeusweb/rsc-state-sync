@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6] — 2026-09-24
+
+### Fixed
+
+- Report unavailable storage writes through `onError` in addition to returning the skipped layer in `CaptureResult`.
+- Preserve the leaving-entry snapshot after a navigation timeout so a later mount can recover the latest state.
+
+### Added
+
+- Added regression coverage for storage quota failures, three rapid superseding navigations and timeout recovery from `history.state`.
+- Backfilled the missing `v0.1.3` Git tag at the published npm `gitHead`.
+
 ## [0.1.5] — 2026-09-24
 
 ### Fixed

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HISTORY_STATE_KEY } from "../src/core/constants.js";
 import { resetBrowserEnv } from "../src/core/env.js";
-import { createRegistry } from "../src/core/index.js";
+import { createRegistry, navigateWithState } from "../src/core/index.js";
 import { fakeHistory, installBrowser, removeBrowser } from "./helpers/browser.js";
 
 function historyBucket(): Record<string, unknown> {
@@ -120,6 +120,25 @@ describe("core/history", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(Object.keys(historyBucket())).toHaveLength(0);
     registry.dispose();
+  });
+
+  it("retains a leaving-entry snapshot for recovery after timeout", async () => {
+    vi.useFakeTimers();
+    const registry = createRegistry();
+    const handle = registry.get("hist/timeout", "initial", { persist: ["history"] });
+    handle.setState("recoverable");
+    const promise = navigateWithState(() => {}, {
+      registry,
+      expectedDestination: "/target",
+      commitTimeout: 20,
+    });
+    await vi.advanceTimersByTimeAsync(21);
+    expect((await promise).timedOut).toBe(true);
+    const recovered = createRegistry().get("hist/timeout", "initial", { persist: ["history"] });
+    expect(recovered.getState()).toBe("recoverable");
+    recovered.dispose();
+    registry.dispose();
+    vi.useRealTimers();
   });
 
   it("remove() cleans the scope from history.state", () => {

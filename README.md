@@ -65,7 +65,7 @@ Plain `<Link>` navigations are also supported (without an explicit transaction â
 - **Multi-layer persistence**: `history.state`, `sessionStorage`, URL parameters, in-memory. Presets: `navigation`, `history`, `session` and `none`.
 - **Versioning, TTL and validation** of restored snapshots; resilient to corrupted or stale data.
 - **View Transitions** as a progressive enhancement (no `document.startViewTransition`? it's just a plain navigation).
-- **Navigation transactions**: sequences, superseding stale navigations, timeouts, `AbortSignal`.
+- **Navigation transactions**: destination-correlated commits, superseding stale navigations, timeout recovery, `AbortSignal`.
 - **SSR-safe**: the server and hydration always see `initialState` â€” no hydration mismatches.
 - **Isolation**: `createNavigationState()` / `createRegistry()` for tests, HMR and multi-tenant apps.
 

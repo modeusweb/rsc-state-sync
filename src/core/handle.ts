@@ -248,7 +248,10 @@ export function createHandle<T>(
       try {
         const writeResult = layer.write(scope, keyFor(layer), record);
         if (writeResult.ok) result.persisted.push(name);
-        else result.skipped.push({ layer: name, error: writeResult.error });
+        else {
+          report(writeResult.error);
+          result.skipped.push({ layer: name, error: writeResult.error });
+        }
       } catch (error) {
         report(error as StateSyncError);
         result.skipped.push({
